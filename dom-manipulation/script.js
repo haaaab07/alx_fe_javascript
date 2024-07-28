@@ -1,3 +1,6 @@
+// Simulated server URL
+const serverUrl = 'https://jsonplaceholder.typicode.com/posts';
+
 // Array of quote objects
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [
   { text: "The greatest glory in living lies not in never falling, but in rising every time we fall.", category: "Motivation" },
@@ -51,6 +54,7 @@ function addQuote() {
     document.getElementById('newQuoteCategory').value = '';
     updateCategoryFilter();
     alert('Quote added successfully!');
+    syncQuotesWithServer();
   } else {
     alert('Please enter both quote text and category.');
   }
@@ -78,6 +82,7 @@ function importFromJsonFile(event) {
     localStorage.setItem('quotes', JSON.stringify(quotes));
     updateCategoryFilter();
     alert('Quotes imported successfully!');
+    syncQuotesWithServer();
   };
   fileReader.readAsText(event.target.files[0]);
 }
@@ -123,6 +128,44 @@ function filterQuotes() {
   });
 }
 
+// Function to sync quotes with the server
+async function syncQuotesWithServer() {
+  try {
+    // Fetch current quotes from the server
+    const response = await fetch(serverUrl);
+    const serverQuotes = await response.json();
+
+    // Resolve conflicts and update local quotes
+    const newQuotes = serverQuotes.filter(serverQuote => {
+      return !quotes.some(localQuote => localQuote.text === serverQuote.text && localQuote.category === serverQuote.category);
+    });
+
+    if (newQuotes.length > 0) {
+      quotes.push(...newQuotes);
+      localStorage.setItem('quotes', JSON.stringify(quotes));
+      updateCategoryFilter();
+      displayNotification('Quotes have been updated from the server.');
+    }
+  } catch (error) {
+    console.error('Error syncing quotes with the server:', error);
+  }
+}
+
+// Function to display notifications
+function displayNotification(message) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.style.display = 'block';
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
+}
+
+// Function to periodically sync data with the server
+function startPeriodicSync() {
+  setInterval(syncQuotesWithServer, 60000); // Sync every 60 seconds
+}
+
 // Event listener for the "Show New Quote" button
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
@@ -130,6 +173,7 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 showRandomQuote();
 createAddQuoteForm();
 populateCategories();
+startPeriodicSync();
 
 // Load the last viewed quote from session storage if available
 const lastViewedQuote = JSON.parse(sessionStorage.getItem('lastViewedQuote'));
