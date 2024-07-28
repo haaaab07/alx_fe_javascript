@@ -167,6 +167,8 @@ async function syncQuotesWithServer(newQuote) {
         body: JSON.stringify(newQuote)
       });
     }
+
+    displayNotification('Quotes synced with server!');
   } catch (error) {
     console.error('Error syncing quotes with the server:', error);
   }
