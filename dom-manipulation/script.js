@@ -83,13 +83,13 @@ function importFromJsonFile(event) {
 }
 
 // Function to populate category filter dropdown
-function updateCategoryFilter() {
+function populateCategories() {
   const categoryFilter = document.getElementById('categoryFilter');
   const categories = ['all', ...new Set(quotes.map(quote => quote.category))];
-  
+
   // Clear existing options
   categoryFilter.innerHTML = '';
-  
+
   // Add new options
   categories.forEach(category => {
     const option = document.createElement('option');
@@ -112,10 +112,10 @@ function filterQuotes() {
   localStorage.setItem('selectedCategory', selectedCategory);
 
   const filteredQuotes = selectedCategory === 'all' ? quotes : quotes.filter(quote => quote.category === selectedCategory);
-  
+
   const quoteDisplay = document.getElementById('quoteDisplay');
   quoteDisplay.innerHTML = '';
-  
+
   filteredQuotes.forEach(quote => {
     const quoteElement = document.createElement('div');
     quoteElement.innerHTML = `<p>${quote.text}</p><p><em>${quote.category}</em></p>`;
@@ -129,7 +129,7 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 // Initial setup
 showRandomQuote();
 createAddQuoteForm();
-updateCategoryFilter();
+populateCategories();
 
 // Load the last viewed quote from session storage if available
 const lastViewedQuote = JSON.parse(sessionStorage.getItem('lastViewedQuote'));
