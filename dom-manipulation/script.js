@@ -128,14 +128,22 @@ function filterQuotes() {
   });
 }
 
+// Function to fetch quotes from the server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(serverUrl);
+    const serverQuotes = await response.json();
+    return serverQuotes;
+  } catch (error) {
+    console.error('Error fetching quotes from the server:', error);
+    return [];
+  }
+}
+
 // Function to sync quotes with the server
 async function syncQuotesWithServer() {
   try {
-    // Fetch current quotes from the server
-    const response = await fetch(serverUrl);
-    const serverQuotes = await response.json();
-
-    // Resolve conflicts and update local quotes
+    const serverQuotes = await fetchQuotesFromServer();
     const newQuotes = serverQuotes.filter(serverQuote => {
       return !quotes.some(localQuote => localQuote.text === serverQuote.text && localQuote.category === serverQuote.category);
     });
